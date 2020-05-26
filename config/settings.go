@@ -25,9 +25,17 @@ type AWSSettings struct {
 	Region              string `yaml:"region"`
 }
 
+type DBSettings struct {
+	User     string `yaml:"user"`
+	Password string `yaml:"password"`
+	Host     string `yaml:"host"`
+	Database string `yaml:"database"`
+}
+
 // Settings struct to unmashal config yml setting
 type Settings struct {
 	Aws AWSSettings
+	DB  DBSettings
 }
 
 // Environment the app is running in either "Production" or "Development"

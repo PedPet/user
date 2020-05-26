@@ -173,9 +173,9 @@ func (c cognitoClient) CheckUsernameTaken(ctx context.Context, username string) 
 	}
 	_, err := c.cognitoClient.AdminGetUser(cu)
 	if err != nil {
-		err, ok := err.(awserr.Error)
+		err2, ok := err.(awserr.Error)
 		if ok {
-			if err.Code() == cognito.ErrCodeUserNotFoundException {
+			if err2.Code() == cognito.ErrCodeUserNotFoundException {
 				return false, nil
 			}
 		}
@@ -207,6 +207,10 @@ func (c cognitoClient) Login(ctx context.Context, username, password string) (*c
 	output, err := c.cognitoClient.InitiateAuth(auth)
 	if err != nil {
 		return nil, errors.Wrap(err, "Failed to authenticate user")
+	}
+
+	if output.AuthenticationResult == nil {
+		return nil, errors.New("Failed to get authenticate user")
 	}
 
 	logger.Log("Login output:", output)
@@ -256,7 +260,7 @@ func (c cognitoClient) GetUserDetails(ctx context.Context, accessToken string) (
 	}
 	output, err := c.cognitoClient.GetUser(ui)
 	if err != nil {
-		errors.Wrap(err, "Failed to get user")
+		return nil, errors.Wrap(err, "Failed to get user")
 	}
 
 	user := &model.User{

@@ -75,6 +75,25 @@ func EncodeConfirmResponse(_ context.Context, r interface{}) (interface{}, error
 	}, nil
 }
 
+// DecodeConfirmResponse decode grpc response into internal response
+func DecodeConfirmResponse(_ context.Context, r interface{}) (interface{}, error) {
+	resp := r.(*pb.ConfirmResponse)
+	return ConfirmResponse{
+		Ok: resp.Ok,
+	}, nil
+}
+
+// EncodeCreateUserRequest encode internal request into grpc request type
+func EncodeCreateUserRequest(_ context.Context, r interface{}) (interface{}, error) {
+	req := r.(CreateUserRequest)
+	return &pb.CreateUserRequest{
+		Username:    req.Username,
+		Email:       req.Email,
+		Password:    req.Password,
+		PhoneNumber: req.PhoneNumber,
+	}, nil
+}
+
 // DecodeCreateUserRequest decode grpc request into expected internal request type
 func DecodeCreateUserRequest(_ context.Context, r interface{}) (interface{}, error) {
 	req := r.(*pb.CreateUserRequest)
@@ -83,6 +102,15 @@ func DecodeCreateUserRequest(_ context.Context, r interface{}) (interface{}, err
 		Email:       req.Email,
 		Password:    req.Password,
 		PhoneNumber: req.PhoneNumber,
+	}, nil
+}
+
+// EncodeConfirmUserRequest encodes internal request into a grpc request type
+func EncodeConfirmUserRequest(_ context.Context, r interface{}) (interface{}, error) {
+	req := r.(ConfirmUserRequest)
+	return &pb.ConfirmUserRequest{
+		Username: req.Username,
+		Code:     req.Code,
 	}, nil
 }
 
@@ -95,10 +123,26 @@ func DecodeConfirmUserRequest(_ context.Context, r interface{}) (interface{}, er
 	}, nil
 }
 
+// EncodeResendConfirmationRequest encodes internal request into grpc request type
+func EncodeResendConfirmationRequest(_ context.Context, r interface{}) (interface{}, error) {
+	req := r.(ResendConfirmationRequest)
+	return &pb.ResendConfirmationRequest{
+		Username: req.Username,
+	}, nil
+}
+
 // DecodeResendConfirmationRequest decode grpc request into expected internal request type
 func DecodeResendConfirmationRequest(_ context.Context, r interface{}) (interface{}, error) {
 	req := r.(*pb.ResendConfirmationRequest)
 	return ResendConfirmationRequest{
+		Username: req.Username,
+	}, nil
+}
+
+// EncodeUsernameTakenRequest encode request into expected grpc request
+func EncodeUsernameTakenRequest(_ context.Context, r interface{}) (interface{}, error) {
+	req := r.(UsernameTakenRequest)
+	return &pb.UsernameTakenRequest{
 		Username: req.Username,
 	}, nil
 }
@@ -108,6 +152,15 @@ func DecodeUsernameTakenRequest(_ context.Context, r interface{}) (interface{}, 
 	req := r.(*pb.UsernameTakenRequest)
 	return UsernameTakenRequest{
 		Username: req.Username,
+	}, nil
+}
+
+// EncodeLoginRequest encode request into expected grpc request
+func EncodeLoginRequest(_ context.Context, r interface{}) (interface{}, error) {
+	req := r.(LoginRequest)
+	return &pb.LoginRequest{
+		Username: req.Username,
+		Password: req.Password,
 	}, nil
 }
 
@@ -128,10 +181,34 @@ func EncodeLoginResponse(_ context.Context, r interface{}) (interface{}, error) 
 	}, nil
 }
 
+// DecodeLoginResponse decode grpc response into expected internal response type
+func DecodeLoginResponse(_ context.Context, r interface{}) (interface{}, error) {
+	resp := r.(*pb.LoginResponse)
+	return LoginResponse{
+		Jwt: resp.Jwt,
+	}, nil
+}
+
+// EncodeVerifyJWTRequest encodes internal request into the expected grpc request type
+func EncodeVerifyJWTRequest(_ context.Context, r interface{}) (interface{}, error) {
+	req := r.(VerifyJWTRequest)
+	return &pb.VerifyJWTRequest{
+		Jwt: req.Jwt,
+	}, nil
+}
+
 // DecodeVerifyJWTRequest decode the grpc request into the expected internal request type
 func DecodeVerifyJWTRequest(_ context.Context, r interface{}) (interface{}, error) {
 	req := r.(*pb.VerifyJWTRequest)
-	return &VerifyJWTRequest{
+	return VerifyJWTRequest{
+		Jwt: req.Jwt,
+	}, nil
+}
+
+// EncodeUserDetailsRequest encodes the internal request into the grpc request type
+func EncodeUserDetailsRequest(_ context.Context, r interface{}) (interface{}, error) {
+	req := r.(UserDetailsRequest)
+	return &pb.UserDetailsRequest{
 		Jwt: req.Jwt,
 	}, nil
 }
@@ -149,6 +226,18 @@ func EncodeUserDetailsResponse(_ context.Context, r interface{}) (interface{}, e
 	resp := r.(UserDetailsResponse)
 	return &pb.UserDetailsResponse{
 		Id:          int32(resp.ID),
+		Username:    resp.Username,
+		Email:       resp.Email,
+		PhoneNumber: resp.PhoneNumber,
+		Confirmed:   resp.Confirmed,
+	}, nil
+}
+
+// DecodeUserDetailsResponse deconds the grpc response into the expected internal response type
+func DecodeUserDetailsResponse(_ context.Context, r interface{}) (interface{}, error) {
+	resp := r.(*pb.UserDetailsResponse)
+	return UserDetailsResponse{
+		ID:          int(resp.Id),
 		Username:    resp.Username,
 		Email:       resp.Email,
 		PhoneNumber: resp.PhoneNumber,

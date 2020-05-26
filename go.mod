@@ -3,8 +3,10 @@ module github.com/PedPet/user
 go 1.13
 
 require (
+	github.com/DATA-DOG/go-sqlmock v1.4.1
 	github.com/PedPet/proto v0.0.2
 	github.com/aws/aws-sdk-go v1.30.15
+	github.com/bxcodec/faker/v3 v3.3.1
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/go-kit/kit v0.10.0
 	github.com/go-sql-driver/mysql v1.5.0

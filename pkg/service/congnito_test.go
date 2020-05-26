@@ -78,9 +78,8 @@ func TestRegister(t *testing.T) {
 	needed := instantiateTest(t)
 	settings := needed.settings.Aws
 
-	reg := &RegFlow{}
 	identity := cognito.New(needed.sess)
-	cc, err := NewCognitoClient(identity, reg, &settings, needed.logger)
+	cc, err := NewCognitoClient(identity, settings, needed.logger)
 
 	err = cc.Register(needed.ctx, needed.user)
 	if err != nil {
@@ -92,9 +91,8 @@ func TestOTP(t *testing.T) {
 	needed := instantiateTest(t)
 	settings := needed.settings.Aws
 
-	reg := &RegFlow{}
 	identity := cognito.New(needed.sess)
-	cc, err := NewCognitoClient(identity, reg, &settings, needed.logger)
+	cc, err := NewCognitoClient(identity, settings, needed.logger)
 
 	err = cc.OTP(needed.ctx, needed.user, "199967")
 	if err != nil {
@@ -106,13 +104,12 @@ func TestResendConfirmation(t *testing.T) {
 	needed := instantiateTest(t)
 	settings := needed.settings.Aws
 
-	reg := &RegFlow{}
 	identity := cognito.New(needed.sess)
-	cc, err := NewCognitoClient(identity, reg, &settings, needed.logger)
+	cc, err := NewCognitoClient(identity, settings, needed.logger)
 	if err != nil {
 		t.Errorf("Failed to create new cognito client: %s", err)
 	}
-	err = cc.ResendConfirmation(needed.ctx, needed.user)
+	err = cc.ResendConfirmation(needed.ctx, needed.user.Username)
 	if err != nil {
 		t.Errorf("Failed to resend confirmation: %v", err)
 	}
@@ -122,13 +119,12 @@ func TestCheckUsernameTaken(t *testing.T) {
 	needed := instantiateTest(t)
 	settings := needed.settings.Aws
 
-	reg := &RegFlow{}
 	identity := cognito.New(needed.sess)
-	cc, err := NewCognitoClient(identity, reg, &settings, needed.logger)
+	cc, err := NewCognitoClient(identity, settings, needed.logger)
 	if err != nil {
 		t.Errorf("Failed to create new cognito client: %s", err)
 	}
-	taken, err := cc.CheckUsernameTaken(needed.user.Username)
+	taken, err := cc.CheckUsernameTaken(needed.ctx, needed.user.Username)
 	if err != nil {
 		t.Errorf("Failed to check if username is already taken: %v", err)
 	}
@@ -140,13 +136,12 @@ func TestLogin(t *testing.T) {
 	needed := instantiateTest(t)
 	settings := needed.settings.Aws
 
-	reg := &RegFlow{}
 	identity := cognito.New(needed.sess)
-	cc, err := NewCognitoClient(identity, reg, &settings, needed.logger)
+	cc, err := NewCognitoClient(identity, settings, needed.logger)
 	if err != nil {
 		t.Errorf("Failed to create new cognito client: %s", err)
 	}
-	err = cc.Login(needed.user.Username, needed.user.Password)
+	_, err = cc.Login(needed.ctx, needed.user.Username, needed.user.Password)
 	if err != nil {
 		t.Errorf("Failed to login: %v", err)
 	}
@@ -179,7 +174,7 @@ func TestGetUserDetails(t *testing.T) {
 		t.Errorf("Failed to create new cognito client: %s", err)
 	}
 
-	_, err = cc.GetUserDetails(needed.ctx, "eyJraWQiOiJNTzd5UGRpRXZoMUxkb2VDQmlrTmkxUXh1UG5ybEdPNEtHQURlaThheGl3PSIsImFsZyI6IlJTMjU2In0.eyJzdWIiOiJiM2EzYWMyZi1mN2YwLTQwODktOTczNy0wNmUzNTc5ZGYzYTIiLCJkZXZpY2Vfa2V5IjoiZXUtd2VzdC0xX2FlZTc0MzlhLWZiYjQtNDMzZC1hN2U1LTg1ODNmNWI0ZmVkZiIsImV2ZW50X2lkIjoiMjNkODhmMWItMTViZC00MzhiLWEyZWYtMmFlYzYxOTZiY2VmIiwidG9rZW5fdXNlIjoiYWNjZXNzIiwic2NvcGUiOiJhd3MuY29nbml0by5zaWduaW4udXNlci5hZG1pbiIsImF1dGhfdGltZSI6MTU4Nzg0NDczMiwiaXNzIjoiaHR0cHM6XC9cL2NvZ25pdG8taWRwLmV1LXdlc3QtMS5hbWF6b25hd3MuY29tXC9ldS13ZXN0LTFfMHBrZ051bzFGIiwiZXhwIjoxNTg3ODQ4MzMyLCJpYXQiOjE1ODc4NDQ3MzIsImp0aSI6IjIxZTJjNjg5LTg5ODktNDNlNC05ZWQwLTNiNTZlZWIzZmQwZSIsImNsaWVudF9pZCI6IjR2NW85bmNkcTQ0NTFzcjAwamlvN3NtbDBoIiwidXNlcm5hbWUiOiJTQzc2MzkifQ.CSLxe3_UnzZlSwSLh2KeNJDZxE8tCxozNCiGNbcaAXcLa6TTvMP873BGIy0_iZoprTCcDjJ_yRtEFmfElY5i3OTQZ7rxoLLjKIsjKzQNG0Tjdua3GLCmOPicjLkU1a4qHZZWG8VYzROpb8dfss2SDQJKX0HmWEcwdWhnEOUdjJyHtbl_cC3_oi4Phf8F5h4qEohpGSaU0pRYek786ymYhEcnZDZWksdTUgN4xxZUkmKrNJNsv5WP5PFnc2InabIVLpMGL6fO6QbS784q8BfzE9NwJ4R0GyTcFrv1dDRE11BDW9JCzhV3MobtSk7IHyVgoIsKkJi0BGTkbyAfmtiz8w", needed.user)
+	_, err = cc.GetUserDetails(needed.ctx, "eyJraWQiOiJTSmVTM2VIT1pvSFFWaXErcUlcL1lQNzVpNjhnQldQQXJmcUEwRUI4ZnZZMD0iLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiIzNTNhNzdlYi00NzI3LTQ5YTgtYjU1Yi0yODdkMGNjZTBjMjQiLCJkZXZpY2Vfa2V5IjoiZXUtd2VzdC0xXzVhMmY0ZTdmLTFiN2QtNGVhNy05MzQ4LTQ0ODIwYTllZDhiMiIsImV2ZW50X2lkIjoiNjg4MTNmMjItNTgxMi00YjA0LTlhMDEtMzc2YjQyODg3Mjk2IiwidG9rZW5fdXNlIjoiYWNjZXNzIiwic2NvcGUiOiJhd3MuY29nbml0by5zaWduaW4udXNlci5hZG1pbiIsImF1dGhfdGltZSI6MTU5MDUwMzk4OSwiaXNzIjoiaHR0cHM6XC9cL2NvZ25pdG8taWRwLmV1LXdlc3QtMS5hbWF6b25hd3MuY29tXC9ldS13ZXN0LTFfOHNyOG9EdVJLIiwiZXhwIjoxNTkwNTA3NTg5LCJpYXQiOjE1OTA1MDM5OTAsImp0aSI6IjQ4ZmMwYzdjLWNjZjAtNGZkNy05OGY2LTkyNDFiZTgxY2QwYiIsImNsaWVudF9pZCI6IjRrdXBqZGg4ZnEzdWJsMTc3YjZjMWZidWF0IiwidXNlcm5hbWUiOiJzYzc2MzkifQ.GTClCaUBf3Yi2fxZiT0Lg-HU0YoMmIlNIFI02TiPHBSCipGELw3ERaTZYPSQNd90FomcvRJlUVvbIVjGh_Z8DgAoBjXnafA0wJJh_MgeTul03vh6NAbCjc8H9AoiHj-ALuKv8Bs63WxBpXV0X6sXh72V0GGyzYbfsNV_DK9dAd7XbUyo4tqUlux3QK47IkhK0CjqjxmXAk5RDbCiYHl1yEEm-tTvq-1hJNXaluFZieUhdb8Tuo3OuAmUY6sEQEZZV3q_bxkjAWFL4vecFYWPBHALim94Clle4VIyIW5J1PcD46Ut0wIzJm9CEvQko3gmYkBI8Jtdi0P4dId9UyQkGQ")
 	if err != nil {
 		t.Errorf("Failed to get user details: %s", err)
 	}

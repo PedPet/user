@@ -14,9 +14,9 @@ import (
 type User interface {
 	CreateUser(ctx context.Context, username, email, password string) (*model.User, error)
 	UserDetails(ctx context.Context, token string) (*model.User, error)
-	ConfirmUser(ctx context.Context, username, otp string) (*model.User, error)
+	ConfirmUser(ctx context.Context, username, otp string) error
 	ResendConfirmation(ctx context.Context, username string) error
-	CheckUsernameTaken(ctx context.Context, username string) (bool, error)
+	UsernameTaken(ctx context.Context, username string) (bool, error)
 	Login(ctx context.Context, username, password string) (string, error)
 	VerifyJWT(ctx context.Context, token string) (bool, error)
 }
@@ -27,7 +27,7 @@ type service struct {
 	logger     log.Logger
 }
 
-// NewLoginService creates a login service with required dependencies
+// NewUserService creates a login service with required dependencies
 func NewUserService(rep repository.User, cognito CognitoClient, logger log.Logger) User {
 	return &service{
 		repository: rep,
@@ -37,7 +37,7 @@ func NewUserService(rep repository.User, cognito CognitoClient, logger log.Logge
 }
 
 // CreateUser registers a user with cognito and then stores the username with an id for further user data storage
-func (s service) CreateUser(ctx context.Context, username email, password string) (*model.User, error) {
+func (s service) CreateUser(ctx context.Context, username, email, password string) (*model.User, error) {
 	logger := log.With(s.logger, "method", "CreateUser")
 
 	user := &model.User{
@@ -49,6 +49,7 @@ func (s service) CreateUser(ctx context.Context, username email, password string
 	err := s.cognito.Register(ctx, user)
 	if err != nil {
 		level.Error(logger).Log("err", err)
+		return nil, err
 	}
 
 	err = s.repository.CreateUser(ctx, user)
@@ -66,6 +67,10 @@ func (s service) UserDetails(ctx context.Context, token string) (*model.User, er
 	logger := log.With(s.logger, "method", "GetUser")
 
 	user, err := s.cognito.GetUserDetails(ctx, token)
+	if err != nil {
+		level.Error(logger).Log("err", err)
+		return nil, err
+	}
 
 	err = s.repository.GetUser(ctx, user)
 	if err != nil {
@@ -78,7 +83,7 @@ func (s service) UserDetails(ctx context.Context, token string) (*model.User, er
 	return user, nil
 }
 
-func (s service) ConfirmUser(ctx context.Context, username, otp string) (*model.User, error) {
+func (s service) ConfirmUser(ctx context.Context, username, otp string) error {
 	logger := log.With(s.logger, "method", "ConfirmUser")
 
 	user := &model.User{
@@ -87,13 +92,11 @@ func (s service) ConfirmUser(ctx context.Context, username, otp string) (*model.
 	err := s.cognito.OTP(ctx, user, otp)
 	if err != nil {
 		level.Error(logger).Log("err", err)
-		return nil, err
+		return err
 	}
 
-	user.Confirmed = true
-
 	logger.Log("Confirm user", user)
-	return user, nil
+	return nil
 }
 
 func (s service) ResendConfirmation(ctx context.Context, username string) error {
@@ -109,13 +112,13 @@ func (s service) ResendConfirmation(ctx context.Context, username string) error 
 	return nil
 }
 
-func (s service) CheckUsernameTaken(ctx context.Context, username string) (bool, error) {
+func (s service) UsernameTaken(ctx context.Context, username string) (bool, error) {
 	logger := log.With(s.logger, "method", "CheckUsernameTaken")
 
 	taken, err := s.cognito.CheckUsernameTaken(ctx, username)
 	if err != nil {
 		level.Error(logger).Log("err", err)
-		return false, nil
+		return false, err
 	}
 
 	logger.Log("Username taken", taken)
@@ -132,7 +135,7 @@ func (s service) Login(ctx context.Context, username, password string) (string, 
 	}
 
 	logger.Log("Login", auth)
-	return aws.StringValue(auth.IdToken), nil
+	return aws.StringValue(auth.AccessToken), nil
 }
 
 func (s service) VerifyJWT(ctx context.Context, jwt string) (bool, error) {
