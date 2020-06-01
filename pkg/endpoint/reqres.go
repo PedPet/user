@@ -14,10 +14,10 @@ type (
 
 	// CreateUserRequest is a struct to convert a create user request to and from json
 	CreateUserRequest struct {
-		Username    string `json:"username" binding:"required"`
-		Email       string `json:"email" binding:"required"`
-		Password    string `json:"password" binding:"required"`
-		PhoneNumber string `json:"phoneNumber" binding:"required"`
+		Username    string `json:"username"`
+		Email       string `json:"email"`
+		Password    string `json:"password"`
+		PhoneNumber string `json:"phoneNumber"`
 	}
 
 	// ConfirmUserRequest is a struct to convert a get user response to and from json
