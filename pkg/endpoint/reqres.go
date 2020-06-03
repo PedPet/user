@@ -14,9 +14,9 @@ type (
 
 	// CreateUserRequest is a struct to convert a create user request to and from json
 	CreateUserRequest struct {
-		Username    string `json:"username"`
-		Email       string `json:"email"`
-		Password    string `json:"password"`
+		Username    string `json:"username" validate:"required"`
+		Email       string `json:"email" validate:"required,email"`
+		Password    string `json:"password" validate:"required,min=8,max=50"`
 		PhoneNumber string `json:"phoneNumber"`
 	}
 
