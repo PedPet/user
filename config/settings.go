@@ -25,6 +25,7 @@ type AWSSettings struct {
 	Region              string `yaml:"region"`
 }
 
+// DBSettings contains the settings used for the database connection
 type DBSettings struct {
 	User     string `yaml:"user"`
 	Password string `yaml:"password"`
@@ -32,18 +33,17 @@ type DBSettings struct {
 	Database string `yaml:"database"`
 }
 
-// Settings struct to unmashal config yml setting
+// Settings struct to unmarshal config yml setting
 type Settings struct {
 	Aws AWSSettings
 	DB  DBSettings
 }
 
-// Environment the app is running in either "Production" or "Development"
-var Environment string = os.Getenv("Environment")
+var environment string = os.Getenv("Environment")
 
-// LoadSettings loads the settings from the
+// LoadSettings loads the settings from the yml file
 func LoadSettings() (*Settings, error) {
-	config, err := ioutil.ReadFile(settingsFiles[Environment])
+	config, err := ioutil.ReadFile(settingsFiles[environment])
 	if err != nil {
 		return nil, err
 	}
