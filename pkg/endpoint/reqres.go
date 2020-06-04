@@ -4,6 +4,8 @@ import (
 	"context"
 
 	pb "github.com/PedPet/proto/api/user"
+	validation "github.com/go-ozzo/ozzo-validation/v4"
+	"github.com/go-ozzo/ozzo-validation/v4/is"
 )
 
 type (
@@ -14,9 +16,9 @@ type (
 
 	// CreateUserRequest is a struct to convert a create user request to and from json
 	CreateUserRequest struct {
-		Username    string `json:"username" validate:"required"`
-		Email       string `json:"email" validate:"required,email"`
-		Password    string `json:"password" validate:"required,min=8,max=50"`
+		Username    string `json:"username"`
+		Email       string `json:"email"`
+		Password    string `json:"password"`
 		PhoneNumber string `json:"phoneNumber"`
 	}
 
@@ -243,4 +245,70 @@ func DecodeUserDetailsResponse(_ context.Context, r interface{}) (interface{}, e
 		PhoneNumber: resp.PhoneNumber,
 		Confirmed:   resp.Confirmed,
 	}, nil
+}
+
+// Username cannot be empty and must be between 2 and 100 characters
+func validUsername(username *string) *validation.FieldRules {
+	return validation.Field(username, validation.Required, validation.Length(2, 100))
+}
+
+// Password cannot be empty and must be between 8 and 100 characters
+func validPassword(password *string) *validation.FieldRules {
+	return validation.Field(password, validation.Required, validation.Length(8, 100))
+}
+
+// Validate the request payload
+func (r CreateUserRequest) Validate() error {
+
+	return validation.ValidateStruct(&r,
+		validUsername(&r.Username),
+		// Email connot be empty and must be a valid email address
+		validation.Field(&r.Email, validation.Required, is.Email),
+		validPassword(&r.Password),
+	)
+}
+
+// Validate the request payload
+func (r ConfirmUserRequest) Validate() error {
+	return validation.ValidateStruct(&r,
+		validUsername(&r.Username),
+		// Code cannot be empty and must be 6 digits
+		validation.Field(&r.Code, validation.Required, validation.Length(6, 6), is.Digit),
+	)
+}
+
+// Validate the request payload
+func (r ResendConfirmationRequest) Validate() error {
+	return validation.ValidateStruct(&r,
+		validUsername(&r.Username),
+	)
+}
+
+// Validate the request payload
+func (r UsernameTakenRequest) Validate() error {
+	return validation.ValidateStruct(&r,
+		validUsername(&r.Username),
+	)
+}
+
+// Validate the request payload
+func (r LoginRequest) Validate() error {
+	return validation.ValidateStruct(&r,
+		validUsername(&r.Username),
+		validPassword(&r.Password),
+	)
+}
+
+// Validate the request payload
+func (r VerifyJWTRequest) Validate() error {
+	return validation.ValidateStruct(&r,
+		validation.Field(&r.Jwt, validation.Required),
+	)
+}
+
+// Validate the request payload
+func (r UserDetailsRequest) Validate() error {
+	return validation.ValidateStruct(&r,
+		validation.Field(&r.Jwt, validation.Required),
+	)
 }
