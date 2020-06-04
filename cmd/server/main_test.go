@@ -4,6 +4,7 @@ import (
 	"context"
 	logg "log"
 	"net"
+	"strings"
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
@@ -128,7 +129,7 @@ func TestCreateUser(t *testing.T) {
 }
 
 func TestConfirmUser(t *testing.T) {
-	t.Skipf("Has to be set up from pervious test")
+	t.Skip("Has to be set up from pervious test")
 	ctx := context.Background()
 
 	conn, err := grpc.DialContext(ctx, "User", grpc.WithContextDialer(bufDialer), grpc.WithInsecure())
@@ -183,7 +184,7 @@ func TestUsernameTaken(t *testing.T) {
 }
 
 func TestLogin(t *testing.T) {
-	t.Skip("Needs to be set up with a confirmed user")
+	// t.Skip("Needs to be set up with a confirmed user")
 
 	ctx := context.Background()
 
@@ -196,6 +197,9 @@ func TestLogin(t *testing.T) {
 	svc := grpcClient.NewClient(conn)
 	jwt, err = svc.Login(ctx, username, password)
 	if err != nil {
+		if strings.Contains(err.Error(), "UserNotConfirmedException") {
+			t.Fatal("User is not confirmed")
+		}
 		t.Fatalf("Failed to login: %s", err)
 	}
 
