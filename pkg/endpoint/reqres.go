@@ -2,8 +2,10 @@ package endpoint
 
 import (
 	"context"
+	"regexp"
 
 	pb "github.com/PedPet/proto/api/user"
+	"github.com/PedPet/user/config"
 	validation "github.com/go-ozzo/ozzo-validation/v4"
 	"github.com/go-ozzo/ozzo-validation/v4/is"
 )
@@ -235,7 +237,7 @@ func EncodeUserDetailsResponse(_ context.Context, r interface{}) (interface{}, e
 	}, nil
 }
 
-// DecodeUserDetailsResponse deconds the grpc response into the expected internal response type
+// DecodeUserDetailsResponse seconds the grpc response into the expected internal response type
 func DecodeUserDetailsResponse(_ context.Context, r interface{}) (interface{}, error) {
 	resp := r.(*pb.UserDetailsResponse)
 	return UserDetailsResponse{
@@ -253,18 +255,28 @@ func validUsername(username *string) *validation.FieldRules {
 }
 
 // Password cannot be empty and must be between 8 and 100 characters
-func validPassword(password *string) *validation.FieldRules {
-	return validation.Field(password, validation.Required, validation.Length(8, 100))
+func validPassword(password *string, rules config.Password) *validation.FieldRules {
+	rr := []validation.Rule{
+		validation.Required,
+		validation.Length(rules.Length.Min, rules.Length.Max),
+	}
+	for _, regex := range rules.Regex {
+		rr = append(rr, validation.Match(regexp.MustCompile(regex)))
+	}
+
+	return validation.Field(
+		password,
+		rr...,
+	)
 }
 
 // Validate the request payload
-func (r CreateUserRequest) Validate() error {
-
+func (r CreateUserRequest) Validate(pwRules config.Password) error {
 	return validation.ValidateStruct(&r,
 		validUsername(&r.Username),
 		// Email connot be empty and must be a valid email address
 		validation.Field(&r.Email, validation.Required, is.Email),
-		validPassword(&r.Password),
+		validPassword(&r.Password, pwRules),
 	)
 }
 
@@ -273,7 +285,7 @@ func (r ConfirmUserRequest) Validate() error {
 	return validation.ValidateStruct(&r,
 		validUsername(&r.Username),
 		// Code cannot be empty and must be 6 digits
-		validation.Field(&r.Code, validation.Required, validation.Length(6, 6), is.Digit),
+		validation.Field(&r.Code, validation.Required, is.Digit, validation.Length(6, 6)),
 	)
 }
 
@@ -292,10 +304,10 @@ func (r UsernameTakenRequest) Validate() error {
 }
 
 // Validate the request payload
-func (r LoginRequest) Validate() error {
+func (r LoginRequest) Validate(rules config.Password) error {
 	return validation.ValidateStruct(&r,
 		validUsername(&r.Username),
-		validPassword(&r.Password),
+		validPassword(&r.Password, rules),
 	)
 }
 

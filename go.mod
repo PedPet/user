@@ -6,6 +6,7 @@ require (
 	github.com/DATA-DOG/go-sqlmock v1.4.1
 	github.com/PedPet/proto v0.0.2
 	github.com/aws/aws-sdk-go v1.30.15
+	github.com/bxcodec/faker v2.0.1+incompatible // indirect
 	github.com/bxcodec/faker/v3 v3.3.1
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/go-kit/kit v0.10.0
@@ -18,6 +19,7 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/pressly/goose v2.6.0+incompatible
 	github.com/sqs/goreturns v0.0.0-20181028201513-538ac6014518 // indirect
+	github.com/stretchr/testify v1.5.1
 	google.golang.org/grpc v1.29.1
 	gopkg.in/yaml.v2 v2.2.8
 )

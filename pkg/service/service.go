@@ -78,7 +78,7 @@ func (s service) UserDetails(ctx context.Context, token string) (*model.User, er
 		return nil, err
 	}
 
-	logger.Log("User details", user)
+	logger.Log("User details" /*, user*/)
 
 	return user, nil
 }
@@ -95,7 +95,7 @@ func (s service) ConfirmUser(ctx context.Context, username, otp string) error {
 		return err
 	}
 
-	logger.Log("Confirm user", user)
+	logger.Log("Confirm user" /*, *user*/)
 	return nil
 }
 

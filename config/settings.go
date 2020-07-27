@@ -33,6 +33,21 @@ type DBSettings struct {
 	Database string `yaml:"database"`
 }
 
+// Validation contains the centrealized settings for validation
+type Validation struct {
+	Password Password `json:"password"`
+}
+
+// Password contains the validation config
+type Password struct {
+	Required bool `json:"required"`
+	Length   struct {
+		Min int `json:"min"`
+		Max int `json:"max"`
+	} `json:"length"`
+	Regex []string `json:"regex"`
+}
+
 // Settings struct to unmarshal config yml setting
 type Settings struct {
 	Aws AWSSettings
